@@ -451,7 +451,8 @@ function renderBoard(resolver: Resolver, board: Board, columns: Column[], tasks:
     for (const task of inGroup) {
       if (shown >= LIST_LIMIT) break;
       const subtasks = children.get(task.id) ?? [];
-      const extras = task.subTasks.length > 0 ? [`subtasks: ${task.subTasks.length}`] : [];
+      const hidden = task.subTasks.length - subtasks.length;
+      const extras = task.subTasks.length > 0 ? [`subtasks: ${task.subTasks.length}${hidden > 0 ? ` (${hidden} not listed here)` : ''}`] : [];
       const parentNote = task.parentId !== null ? [`subtask of #${task.parentId}`] : [];
       lines.push(`- ${taskRow(task, labels, [...extras, ...parentNote])}`);
       shown++;

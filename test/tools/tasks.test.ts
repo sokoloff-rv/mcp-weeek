@@ -8,7 +8,7 @@ describe('weeek_list_tasks', () => {
     const harness = await createHarness();
     harness.fake.on('GET', '/tm/tasks', {
       tasks: [
-        task({ id: 1, title: 'Первая', boardColumnId: 101, priority: 2, dueDate: '2026-10-20', assignees: ['7'], tags: [1], subTasks: [3] }),
+        task({ id: 1, title: 'Первая', boardColumnId: 101, priority: 2, dueDate: '2026-10-20', assignees: ['7'], tags: [1], subTasks: [3, 5] }),
         task({ id: 2, title: 'Вторая', boardColumnId: 103, attachments: [{ id: 'a', name: 'x.png', size: 1, url: '', createdAt: '', creatorId: null }] }),
         task({ id: 3, title: 'Подзадача', boardColumnId: 101, parentId: 1 }),
         task({ id: 4, title: 'Удалённая', isDeleted: true }),
@@ -22,7 +22,7 @@ describe('weeek_list_tasks', () => {
         'Board Задачи (11) [main]: 3 tasks, completed hidden.',
         '',
         '## На очереди (101) [queue] — 1',
-        '- #1 Первая · high · due 2026-10-20 · @Анна Петрова · #bug · subtasks: 1',
+        '- #1 Первая · high · due 2026-10-20 · @Анна Петрова · #bug · subtasks: 2 (1 not listed here)',
         '  - #3 Подзадача',
         '',
         '## В процессе (102) [in_progress] — 0',
