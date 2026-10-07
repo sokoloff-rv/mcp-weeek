@@ -26,10 +26,17 @@ type Route = {
 export class FakeFetch {
   readonly calls: FakeRequest[] = [];
   readonly #routes: Route[] = [];
+  readonly #fallbacks: Route[] = [];
 
+  /** Маршрут теста: проверяется раньше маршрутов по умолчанию, в порядке добавления. */
   on(method: string, path: string | RegExp, handler: Handler | object, options: { times?: number } = {}): this {
-    const reply = typeof handler === 'function' ? (handler as Handler) : () => handler;
-    this.#routes.push({ method, path, handler: reply, remaining: options.times ?? Infinity });
+    this.#routes.push(route(method, path, handler, options.times));
+    return this;
+  }
+
+  /** Маршрут по умолчанию: срабатывает, только если ни один маршрут теста не подошёл. */
+  fallback(method: string, path: string | RegExp, handler: Handler | object): this {
+    this.#fallbacks.push(route(method, path, handler, undefined));
     return this;
   }
 
@@ -51,13 +58,19 @@ export class FakeFetch {
       init,
     };
     this.calls.push(request);
-    const route = this.#routes.find((candidate) => candidate.method === method && candidate.remaining > 0 && matches(candidate.path, request.path));
-    if (!route) throw new Error(`Unexpected request: ${method} ${url.href}`);
-    route.remaining -= 1;
-    const reply = await route.handler(request);
+    const fits = (candidate: Route) => candidate.method === method && candidate.remaining > 0 && matches(candidate.path, request.path);
+    const found = this.#routes.find(fits) ?? this.#fallbacks.find(fits);
+    if (!found) throw new Error(`Unexpected request: ${method} ${url.href}`);
+    found.remaining -= 1;
+    const reply = await found.handler(request);
     if (reply instanceof Response) return reply;
     return json(reply ?? { success: true });
   };
+}
+
+function route(method: string, path: string | RegExp, handler: Handler | object, times: number | undefined): Route {
+  const reply = typeof handler === 'function' ? (handler as Handler) : () => handler;
+  return { method, path, handler: reply, remaining: times ?? Infinity };
 }
 
 function matches(pattern: string | RegExp, path: string): boolean {
