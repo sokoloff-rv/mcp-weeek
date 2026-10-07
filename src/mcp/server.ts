@@ -23,6 +23,8 @@ export const RPC_ERRORS = {
 } as const;
 
 const CAPABILITIES = { tools: {} };
+const CACHEABLE_METHODS = new Set(['server/discover', 'tools/list']);
+const CACHE_HINTS = { ttlMs: 3_600_000, cacheScope: 'public' };
 
 type RequestId = string | number;
 
@@ -75,7 +77,7 @@ export class McpServer {
     try {
       const modern = this.#isModernRequest(params);
       const result = await this.#dispatch(method, params, signal);
-      return { jsonrpc: '2.0', id, result: modern ? this.#modernResult(result) : result };
+      return { jsonrpc: '2.0', id, result: modern ? this.#modernResult(method, result) : result };
     } catch (error) {
       if (error instanceof RpcError) return errorResponse(id, error.code, error.message, error.data);
       this.#options.log.error(`${method} failed: ${describeError(error)}`);
@@ -144,9 +146,10 @@ export class McpServer {
     return true;
   }
 
-  #modernResult(result: JsonObject): JsonObject {
+  #modernResult(method: string, result: JsonObject): JsonObject {
     const meta = isObject(result._meta) ? result._meta : {};
-    return { resultType: 'complete', ...result, _meta: { ...meta, [META_SERVER_INFO]: this.#serverInfo() } };
+    const hints = CACHEABLE_METHODS.has(method) ? CACHE_HINTS : {};
+    return { resultType: 'complete', ...result, ...hints, _meta: { ...meta, [META_SERVER_INFO]: this.#serverInfo() } };
   }
 
   #dispatch(method: string, params: JsonObject, signal: AbortSignal): Promise<JsonObject> | JsonObject {

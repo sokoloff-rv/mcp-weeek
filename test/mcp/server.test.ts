@@ -74,6 +74,8 @@ describe('McpServer: modern requests', () => {
     assert.equal(response?.result?.resultType, 'complete');
     assert.deepEqual(response?.result?.supportedVersions, [...MODERN_VERSIONS, ...LEGACY_VERSIONS]);
     assert.deepEqual(response?.result?.capabilities, { tools: {} });
+    assert.equal(response?.result?.ttlMs, 3_600_000);
+    assert.equal(response?.result?.cacheScope, 'public');
     assert.deepEqual(response?.result?._meta, {
       'io.modelcontextprotocol/serverInfo': { name: 'test-server', version: '1.2.3' },
     });
@@ -84,6 +86,17 @@ describe('McpServer: modern requests', () => {
     const response = await server.handle({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: { _meta: MODERN_META } });
     assert.equal(response?.result?.resultType, 'complete');
     assert.ok(response?.result?._meta);
+  });
+
+  it('adds caching hints only to cacheable modern results', async () => {
+    const { server } = createServer();
+    const list = await server.handle({ jsonrpc: '2.0', id: 1, method: 'tools/list', params: { _meta: MODERN_META } });
+    assert.equal(list?.result?.ttlMs, 3_600_000);
+    assert.equal(list?.result?.cacheScope, 'public');
+    const call = await server.handle({ jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'echo', _meta: MODERN_META } });
+    assert.equal(call?.result?.ttlMs, undefined);
+    const legacy = await server.handle({ jsonrpc: '2.0', id: 3, method: 'tools/list' });
+    assert.equal(legacy?.result?.ttlMs, undefined);
   });
 
   it('rejects an unsupported protocol version with the supported list', async () => {
