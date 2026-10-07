@@ -226,7 +226,7 @@ function memberNames(member: Member): string[] {
     .filter((name): name is string => Boolean(name));
 }
 
-export function nameOf(members: readonly Member[], id: string): string {
+function nameOf(members: readonly Member[], id: string): string {
   const member = members.find((candidate) => candidate.id === id);
   return member ? memberName(member) : id;
 }

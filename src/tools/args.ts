@@ -23,10 +23,6 @@ export class Args {
     }
   }
 
-  has(name: string): boolean {
-    return this.#raw[name] !== undefined;
-  }
-
   string(name: string, options: Options & { required: true }): string;
   string(name: string, options?: Options): string | undefined;
   string(name: string, options: Options = {}): string | undefined {

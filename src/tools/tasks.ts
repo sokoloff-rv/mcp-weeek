@@ -439,14 +439,13 @@ function renderBoard(resolver: Resolver, board: Board, columns: Column[], tasks:
   }
   const topLevel = tasks.filter((task) => task.parentId === null || !ids.has(task.parentId));
   let shown = 0;
-  const groups = [
-    ...columns.map((column) => ({ title: `${column.name} (${column.id})${resolver.columnAlias(column) ? ` [${resolver.columnAlias(column)}]` : ''}`, id: column.id as number | null })),
-  ];
   const known = new Set(columns.map((column) => column.id));
-  if (topLevel.some((task) => task.boardColumnId === null || !known.has(task.boardColumnId))) groups.push({ title: 'Without column', id: null });
+  const columnOf = (task: Task) => (task.boardColumnId !== null && known.has(task.boardColumnId) ? task.boardColumnId : null);
+  const groups: { title: string; id: number | null }[] = columns.map((column) => ({ title: resolver.columnLabel(column), id: column.id }));
+  if (topLevel.some((task) => columnOf(task) === null)) groups.push({ title: 'Without column', id: null });
 
   for (const group of groups) {
-    const inGroup = topLevel.filter((task) => (group.id === null ? task.boardColumnId === null || !known.has(task.boardColumnId) : task.boardColumnId === group.id));
+    const inGroup = topLevel.filter((task) => columnOf(task) === group.id);
     lines.push('', `## ${group.title} — ${inGroup.length}`);
     for (const task of inGroup) {
       if (shown >= LIST_LIMIT) break;

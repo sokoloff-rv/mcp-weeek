@@ -138,7 +138,7 @@ function isClosingFence(line: string, marker: string): boolean {
 
 const PLACEHOLDER = (index: number) => `\u0000${index}\u0000`;
 
-export function renderInline(text: string): string {
+function renderInline(text: string): string {
   const stash: string[] = [];
   const keep = (html: string) => PLACEHOLDER(stash.push(html) - 1);
 
