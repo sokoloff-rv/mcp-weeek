@@ -165,6 +165,7 @@ describe('WeeekClient: retries', () => {
     );
     const slow = createClient(hanging, { attempts: 1, timeoutMs: 20 });
     await assert.rejects(slow.client.get('/ws'), /did not respond within 0\.02 s/);
+    await assert.rejects(slow.client.request('GET', '/ws', { timeoutMs: 30 }), /did not respond within 0\.03 s/);
   });
 
   it('stops immediately when the caller cancels', async () => {

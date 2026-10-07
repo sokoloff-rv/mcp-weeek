@@ -4,6 +4,7 @@ import type { Attachment, Board, Column, Comment, Member, Project, Tag, Task, Wo
 const TASKS_PAGE = 100;
 const COMMENTS_PAGE = 100;
 const MAX_TASKS = 5_000;
+const UPLOAD_TIMEOUT_MS = 5 * 60_000;
 
 export type TaskFilter = {
   projectId?: number | undefined;
@@ -146,7 +147,8 @@ export class WeeekApi {
   async uploadAttachments(taskId: number, files: UploadFile[], signal?: AbortSignal): Promise<Attachment[]> {
     const form = new FormData();
     for (const file of files) form.append('files[]', file.blob, file.name);
-    return (await this.#client.request<{ data: Attachment[] }>('POST', `/tm/tasks/${taskId}/attachments`, { form, signal })).data;
+    const options = { form, signal, timeoutMs: UPLOAD_TIMEOUT_MS };
+    return (await this.#client.request<{ data: Attachment[] }>('POST', `/tm/tasks/${taskId}/attachments`, options)).data;
   }
 
   async attachment(id: string, signal?: AbortSignal): Promise<Attachment> {

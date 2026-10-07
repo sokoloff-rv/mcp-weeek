@@ -12,6 +12,7 @@ export type RequestOptions = {
   body?: unknown;
   form?: FormData;
   retry?: boolean;
+  timeoutMs?: number;
   signal?: AbortSignal | undefined;
 };
 
@@ -107,7 +108,8 @@ export class WeeekClient {
       headers['Content-Type'] = 'application/json';
       body = JSON.stringify(options.body);
     }
-    const timeout = deadline(this.#timeoutMs, options.signal);
+    const timeoutMs = options.timeoutMs ?? this.#timeoutMs;
+    const timeout = deadline(timeoutMs, options.signal);
     const label = `${method} ${path}`;
     const started = Date.now();
     let response: Response;
@@ -118,7 +120,7 @@ export class WeeekClient {
     } catch (error) {
       if (options.signal?.aborted) throw error;
       if (timeout.expired()) {
-        throw new WeeekError(`Weeek did not respond within ${this.#timeoutMs / 1000} s (${label}).`, undefined, true);
+        throw new WeeekError(`Weeek did not respond within ${timeoutMs / 1000} s (${label}).`, undefined, true);
       }
       throw new WeeekError(`Network error while calling Weeek (${label}): ${errorMessage(error)}`, undefined, true);
     } finally {
