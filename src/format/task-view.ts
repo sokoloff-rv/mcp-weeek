@@ -62,8 +62,8 @@ export function formatSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1).replace(/\.0$/, '')} MB`;
 }
 
-export function plural(count: number, noun: string): string {
-  return `${count} ${noun}${count === 1 ? '' : 's'}`;
+export function plural(count: number, noun: string, many = `${noun}s`): string {
+  return `${count} ${count === 1 ? noun : many}`;
 }
 
 export function taskLink(workspaceId: number, task: Pick<Task, 'id' | 'projectId' | 'boardId'>): string | undefined {
