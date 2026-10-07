@@ -46,6 +46,7 @@ export function createApp(options: AppOptions): McpServer {
     loadConfig: () => loader.load(),
     readOnly: env.readOnly,
     downloadDir: options.downloadDir,
+    homeDir: options.homeDir,
     fetch: fetchImpl,
     now: options.now ?? (() => new Date()),
   });

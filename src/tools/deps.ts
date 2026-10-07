@@ -10,6 +10,7 @@ export type Deps = {
   loadConfig: () => Promise<LoadedConfig>;
   readOnly: boolean;
   downloadDir: string;
+  homeDir: string;
   fetch: FetchLike;
   now: () => Date;
 };

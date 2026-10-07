@@ -48,6 +48,14 @@ export class Args {
     return number;
   }
 
+  integer(name: string, min: number): number | undefined {
+    const value = this.#raw[name];
+    if (value === undefined || value === null || value === '') return undefined;
+    const number = typeof value === 'string' && /^\s*-?\d+\s*$/.test(value) ? Number(value) : value;
+    if (typeof number !== 'number' || !Number.isInteger(number) || number < min) throw this.#invalid(name, `must be an integer, at least ${min}`);
+    return number;
+  }
+
   ref(name: string, options: Options & { required: true }): Ref;
   ref(name: string, options?: Options): Ref | undefined;
   ref(name: string, options: Options = {}): Ref | undefined {

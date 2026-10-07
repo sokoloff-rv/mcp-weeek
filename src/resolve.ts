@@ -44,9 +44,11 @@ export class Resolver {
   }
 
   async column(board: Board, ref: Ref): Promise<Column> {
-    const target = this.#columnTarget(ref);
+    const targets = [...new Set([this.#columnTarget(ref), typeof ref === 'string' ? ref.trim() : ref])];
+    const matchesTarget = (column: Column, target: string | number) =>
+      typeof target === 'number' ? column.id === target : sameName(column.name, target);
     const find = (columns: Column[]) =>
-      columns.filter((column) => (typeof target === 'number' ? column.id === target : sameName(column.name, target)));
+      targets.map((target) => columns.filter((column) => matchesTarget(column, target))).find((found) => found.length > 0) ?? [];
     let columns = await this.columns(board);
     let found = find(columns);
     if (found.length === 0) {

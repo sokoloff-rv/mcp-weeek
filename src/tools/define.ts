@@ -1,4 +1,5 @@
 import type { JsonSchema, Tool, ToolAnnotations, ToolCallContext } from '../mcp/tool.ts';
+import { UserError } from '../errors.ts';
 import { Args } from './args.ts';
 
 export type ToolSpec = {
@@ -8,6 +9,7 @@ export type ToolSpec = {
   properties: Record<string, JsonSchema>;
   required?: string[];
   annotations: ToolAnnotations;
+  hints?: Record<string, string>;
   run: (args: Args, context: ToolCallContext) => Promise<string>;
 };
 
@@ -24,7 +26,11 @@ export function defineTool(spec: ToolSpec): Tool {
       additionalProperties: false,
     },
     annotations: { openWorldHint: true, ...spec.annotations },
-    handler: (raw, context) => spec.run(new Args(spec.name, raw, allowed), context),
+    handler: (raw, context) => {
+      const hint = Object.entries(spec.hints ?? {}).find(([name]) => raw[name] !== undefined)?.[1];
+      if (hint) throw new UserError(hint);
+      return spec.run(new Args(spec.name, raw, allowed), context);
+    },
   };
 }
 
