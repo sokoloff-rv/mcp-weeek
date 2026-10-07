@@ -1,0 +1,27 @@
+{
+  "name": "mcp-weeek",
+  "version": "0.1.0",
+  "description": "MCP server for the Weeek task manager: tasks, comments, attachments and time reports for any project",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "Roman Sokolov",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sokoloff-rv/mcp-weeek.git"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node src/index.ts",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm test",
+    "live": "node scripts/live-check.ts"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "7.0.2"
+  }
+}

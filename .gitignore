@@ -1,0 +1,14 @@
+node_modules/
+*.log
+
+# Документация и файлы для агентов — только локально
+docs/
+.claude/
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.codex/
+.gemini/
+
+# Локальный конфиг проекта Weeek для живой проверки
+.weeek.json
